@@ -293,19 +293,13 @@ namespace Stockfish::Eval::NNUE {
 
         if (pc != NO_PIECE && type_of(pc) != KING)
         {
-          auto st = pos.state();
-
           pos.remove_piece(sq);
-          st->accumulator.computed[WHITE] = false;
-          st->accumulator.computed[BLACK] = false;
 
           Value eval = evaluate(pos);
           eval = pos.side_to_move() == WHITE ? eval : -eval;
           v = base - eval;
 
           pos.put_piece(pc, sq);
-          st->accumulator.computed[WHITE] = false;
-          st->accumulator.computed[BLACK] = false;
         }
 
         writeSquare(f, r, pc, v);

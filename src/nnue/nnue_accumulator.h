@@ -29,7 +29,6 @@ namespace Stockfish::Eval::NNUE {
   struct alignas(CacheLineSize) Accumulator {
     std::int16_t accumulation[2][TransformedFeatureDimensions];
     std::int32_t psqtAccumulation[2][PSQTBuckets];
-    bool computed[2];
   };
 
 }  // namespace Stockfish::Eval::NNUE

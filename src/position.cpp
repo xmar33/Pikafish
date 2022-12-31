@@ -29,6 +29,7 @@
 #include "thread.h"
 #include "tt.h"
 #include "uci.h"
+#include "nnue/evaluate_nnue.h"
 
 using std::string;
 
@@ -217,6 +218,9 @@ void Position::set_state(StateInfo* si) const {
 
   if (sideToMove == BLACK)
       si->key ^= Zobrist::side;
+
+  Eval::NNUE::featureTransformer->refresh_accumulator<WHITE>(*this);
+  Eval::NNUE::featureTransformer->refresh_accumulator<BLACK>(*this);
 }
 
 
@@ -440,12 +444,6 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
   st->rule60 += givesCheck && ++st->check10[sideToMove] > 10 ? -1 : 1;
   ++st->pliesFromNull;
 
-  // Used by NNUE
-  st->accumulator.computed[WHITE] = false;
-  st->accumulator.computed[BLACK] = false;
-  auto& dp = st->dirtyPiece;
-  dp.dirty_num = 1;
-
   Color us = sideToMove;
   Color them = ~us;
   Square from = from_sq(m);
@@ -456,6 +454,13 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
   assert(color_of(pc) == us);
   assert(captured == NO_PIECE || color_of(captured) == them);
   assert(type_of(captured) != KING);
+
+  // Used by NNUE
+  auto& dp = st->dirtyPiece;
+  dp.dirty_num = 1;
+  dp.piece[0] = pc;
+  dp.from[0] = from;
+  dp.to[0] = to;
 
   if (captured)
   {
@@ -468,9 +473,6 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
       dp.from[1] = capsq;
       dp.to[1] = SQ_NONE;
 
-      // Update board and piece lists
-      remove_piece(capsq);
-
       // Update hash key
       k ^= Zobrist::psq[captured][capsq];
 
@@ -481,11 +483,15 @@ void Position::do_move(Move m, StateInfo& newSt, bool givesCheck) {
   // Update hash key
   k ^= Zobrist::psq[pc][from] ^ Zobrist::psq[pc][to];
 
-  // Move the piece.
-  dp.piece[0] = pc;
-  dp.from[0] = from;
-  dp.to[0] = to;
+  // Update accumulator
+  Eval::NNUE::featureTransformer->update_accumulator<WHITE>(*this);
+  Eval::NNUE::featureTransformer->update_accumulator<BLACK>(*this);
 
+  // Remove the piece.
+  if (captured)
+    remove_piece(to);
+
+  // Move the piece.
   move_piece(from, to);
 
   // Set capture piece
@@ -552,15 +558,10 @@ void Position::do_null_move(StateInfo& newSt) {
   // Update the bloom filter
   ++filter[st->key];
 
-  std::memcpy(&newSt, st, offsetof(StateInfo, accumulator));
+  std::memcpy(&newSt, st, sizeof(StateInfo));
 
   newSt.previous = st;
   st = &newSt;
-
-  st->dirtyPiece.dirty_num = 0;
-  st->dirtyPiece.piece[0] = NO_PIECE; // Avoid checks in UpdateAccumulator()
-  st->accumulator.computed[WHITE] = false;
-  st->accumulator.computed[BLACK] = false;
 
   st->key ^= Zobrist::side;
   ++st->rule60;
