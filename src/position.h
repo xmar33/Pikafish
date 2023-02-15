@@ -144,7 +144,6 @@ public:
   int rule60_count() const;
   bool has_mate_threat(Depth d = -1);
   ChaseMap chased(Color c);
-  Value material() const;
   Value psq_score() const;
 
   // Position consistency check, for debugging
@@ -293,12 +292,10 @@ inline Key Position::adjust_key60(Key k) const
                ? k : k ^ make_key((st->rule60 - (14 - AfterMove)) / 8);
 }
 
-inline Value Position::material() const {
-  return mg_value(psq);
-}
-
 inline Value Position::psq_score() const {
-  return (sideToMove == WHITE ? 1 : -1) * eg_value(psq);
+  int phase = count<ALL_PIECES>() - 2;
+  Value v = (mg_value(psq) * phase + eg_value(psq) * (30 - phase)) / 30;
+  return (sideToMove == WHITE ? 1 : -1) * v;
 }
 
 inline int Position::game_ply() const {

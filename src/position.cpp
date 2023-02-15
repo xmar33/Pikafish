@@ -184,11 +184,12 @@ void Position::set_check_info(StateInfo* si) const {
   // We have to take special cares about the cannon and checks
   si->needSlowCheck = checkers() || (attacks_bb<ROOK>(uksq) & pieces(~us, CANNON));
 
-  si->checkSquares[PAWN]   = pawn_attacks_to_bb(sideToMove, oksq);
-  si->checkSquares[KNIGHT] = attacks_bb<KNIGHT_TO>(oksq, pieces());
-  si->checkSquares[CANNON] = attacks_bb<CANNON>(oksq, pieces());
-  si->checkSquares[ROOK]   = attacks_bb<ROOK>(oksq, pieces());
-  si->checkSquares[KING]   = si->checkSquares[ADVISOR] = si->checkSquares[BISHOP] = 0;
+  si->checkSquares[PAWN]    = pawn_attacks_to_bb(sideToMove, oksq);
+  si->checkSquares[KNIGHT]  = attacks_bb<KNIGHT_TO>(oksq, pieces());
+  si->checkSquares[CANNON]  = attacks_bb<CANNON>(oksq, pieces());
+  si->checkSquares[ROOK]    = attacks_bb<ROOK>(oksq, pieces());
+  si->checkSquares[ADVISOR] = attacks_bb<ADVISOR>(oksq);
+  si->checkSquares[KING]    = si->checkSquares[BISHOP] = 0;
 }
 
 
@@ -311,7 +312,8 @@ Bitboard Position::checkers_to(Color c, Square s, Bitboard occupied) const {
     return ( (pawn_attacks_to_bb(c, s)           & pieces(      PAWN))
            | (attacks_bb<KNIGHT_TO>(s, occupied) & pieces(    KNIGHT))
            | (attacks_bb<     ROOK>(s, occupied) & pieces(KING, ROOK))
-           | (attacks_bb<   CANNON>(s, occupied) & pieces(    CANNON)) ) & pieces(c);
+           | (attacks_bb<   CANNON>(s, occupied) & pieces(    CANNON))
+           | (attacks_bb<  ADVISOR>(s          ) & pieces(   ADVISOR)) ) & pieces(c);
 }
 
 

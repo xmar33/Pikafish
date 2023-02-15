@@ -68,6 +68,8 @@ namespace Eval {
   /// NNUE::verify() verifies that the last net used was loaded successfully
   void NNUE::verify() {
 
+    return;
+
     string eval_file = string(Options["EvalFile"]);
     if (eval_file.empty())
         eval_file = EvalFileDefaultName;
@@ -106,23 +108,28 @@ using namespace Trace;
 
 Value Eval::evaluate(const Position& pos, int* complexity) {
 
-  int nnueComplexity;
-  Value nnue = NNUE::evaluate(pos, &nnueComplexity);
-  Value  psq = pos.psq_score();
+  if (complexity)
+      *complexity = 0;
 
-  // Blend nnue complexity with (semi)classical complexity
-  Value optimism = pos.this_thread()->optimism[pos.side_to_move()];
-  nnueComplexity = (  381 * nnueComplexity
-                    + 380 * abs(psq - nnue)
-                    + int(optimism) * int(psq - nnue)
-                    ) / 1024;
-  if (complexity) // Return hybrid NNUE complexity to caller
-      *complexity = nnueComplexity;
+  Value v = pos.psq_score();
 
-  // scale nnue score according to material and optimism
-  int scale = 837 + 139 * pos.material() / 4096;
-  optimism = optimism * (259 + nnueComplexity) / 256;
-  Value v = (nnue * scale + optimism * (scale - 942)) / 1024;
+//  int nnueComplexity;
+//  Value nnue = NNUE::evaluate(pos, &nnueComplexity);
+//  Value  psq = pos.psq_score();
+
+//  // Blend nnue complexity with (semi)classical complexity
+//  Value optimism = pos.this_thread()->optimism[pos.side_to_move()];
+//  nnueComplexity = (  381 * nnueComplexity
+//                    + 380 * abs(psq - nnue)
+//                    + int(optimism) * int(psq - nnue)
+//                    ) / 1024;
+//  if (complexity) // Return hybrid NNUE complexity to caller
+//      *complexity = nnueComplexity;
+
+//  // scale nnue score according to material and optimism
+//  int scale = 837 + 139 * pos.material() / 4096;
+//  optimism = optimism * (259 + nnueComplexity) / 256;
+//  Value v = (nnue * scale + optimism * (scale - 942)) / 1024;
 
   // Damp down the evaluation linearly when shuffling
   v = v * (130 - pos.rule60_count()) / 120;

@@ -39,7 +39,7 @@ namespace Stockfish {
 namespace {
 
   // FEN string for the initial position in standard xiangqi
-  const char* StartFEN = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
+  const char* StartFEN = "rnb1k1bnr/4a4/1c5c1/p1p1p1p1p/4a4/4A4/P1P1P1P1P/1C5C1/4A4/RNB1K1BNR w";
 
 
   // position() is called when the engine receives the "position" UCI command.
