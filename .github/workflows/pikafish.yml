@@ -40,7 +40,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install clang llvm
+          sudo apt upgrade clang llvm
 
       - name: Setup msys and install required packages
         if: runner.os == 'Windows'
@@ -76,7 +76,7 @@ jobs:
 
       - name: Download wiki
         run: |
-          git clone https://github.com/official-pikafish/Pikafish.wiki.git ../wiki
+          git clone https://github.com/official-pikafish/Pikafish.wiki.git ../Wiki
           cd ../wiki
           rm -rf .git
 
@@ -85,7 +85,7 @@ jobs:
           name: Pikafish
           path: |
             ${{ matrix.config.name }}/*
-            wiki
+            Wiki
             AUTHORS
             Copying.txt
             README.md
