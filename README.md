@@ -186,4 +186,4 @@ derived from this program due to their unfriendly actions, activities, and licen
 [wiki-usage-link]:    https://github.com/official-pikafish/Pikafish/wiki/Download-and-usage
 [wiki-compile-link]:  https://github.com/official-pikafish/Pikafish/wiki/Compiling-from-source
 [wiki-commands-link]: https://github.com/official-pikafish/Pikafish/wiki/Commands
-[worker-link]:			https://github.com/xyztnecniV/yolo
+[worker-link]:			https://github.com/xyztnecniV/yolo/
