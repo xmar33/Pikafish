@@ -501,13 +501,13 @@ namespace {
     constexpr bool PvNode = nodeType != NonPV;
     constexpr bool rootNode = nodeType == Root;
 
-    // Dive into quiescence search when the depth reaches zero
-    if (depth <= 0)
+    // Dive into quiescence search when the depth reaches zero or MAX_PLY
+    if (depth <= 0 || depth >= MAX_PLY)
         return qsearch<PvNode ? PV : NonPV>(pos, ss, alpha, beta);
 
     assert(-VALUE_INFINITE <= alpha && alpha < beta && beta <= VALUE_INFINITE);
     assert(PvNode || (alpha == beta - 1));
-    assert(0 < depth && depth < MAX_PLY);
+    //assert(0 < depth && depth < MAX_PLY);
     assert(!(PvNode && cutNode));
 
     Move pv[MAX_PLY+1], capturesSearched[32], quietsSearched[64];
